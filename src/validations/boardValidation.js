@@ -8,14 +8,11 @@ const createNew = async (req, res, next) => {
   })
 
   try {
-    //eslint-disable-next-line no-console
-    console.log('Request body: ', req.body)
 
     await correctCondition.validateAsync(req.body, { abortEarly: false })
 
-    // next()
+    next()
 
-    res.status(StatusCodes.CREATED).json({ message: 'API create board' })
   } catch (error) {
     //eslint-disable-next-line no-console
     console.log(error)
