@@ -8,6 +8,7 @@ import express from 'express'
 import { connectDb } from '~/config/mongodb'
 import { env } from '~/config/environment'
 import { APIs_V1 } from '~/routes/v1'
+import { errorHandlingMiddleware } from '~/middlewares/errorHandlingMiddleware'
 
 const startServer = () => {
   const app = express()
@@ -17,6 +18,8 @@ const startServer = () => {
 
   // Use APIs V1
   app.use('/v1', APIs_V1)
+
+  app.use(errorHandlingMiddleware)
 
   app.get('/', (req, res) => {
     res.end('<h1>Hello World!</h1><hr>')
