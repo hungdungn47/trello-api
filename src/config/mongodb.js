@@ -1,11 +1,9 @@
-const MONGODB_URI = 'mongodb://127.0.0.1:27017'
-const DATABASE_NAME = 'trello-mern-stack'
-
 const { MongoClient, ServerApiVersion } = require('mongodb')
+import { env } from './config/environment'
 
 let trelloDatabaseInstance = null
 
-const client = new MongoClient(MONGODB_URI, {
+const client = new MongoClient(env.MONGODB_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -16,7 +14,7 @@ const client = new MongoClient(MONGODB_URI, {
 export const connectDb = async () => {
   await client.connect()
 
-  trelloDatabaseInstance = client.db(DATABASE_NAME)
+  trelloDatabaseInstance = client.db(env.DATABASE_NAME)
 }
 
 export const getDb = () => {
