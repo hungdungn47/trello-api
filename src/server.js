@@ -5,14 +5,16 @@
  */
 
 import express from 'express'
-import { closeDb, connectDb, getDb } from '~/config/mongodb'
-import { env } from './config/environment'
+import { connectDb } from '~/config/mongodb'
+import { env } from '~/config/environment'
+import { APIs_V1 } from '~/routes/v1'
 
 const startServer = () => {
   const app = express()
 
-  app.get('/', async (req, res) => {
-    console.log(await getDb().listCollections().toArray())
+  app.use('/v1', APIs_V1)
+
+  app.get('/', (req, res) => {
     res.end('<h1>Hello World!</h1><hr>')
   })
 
@@ -24,12 +26,14 @@ const startServer = () => {
 
 connectDb()
   .then(() => {
+    // eslint-disable-next-line no-console
     console.log('Connected to MongoDB localhost server')
   })
   .then(() => {
     startServer()
   })
   .catch(err => {
+    // eslint-disable-next-line no-console
     console.error(err)
     process.exit(0)
   })
