@@ -5,28 +5,20 @@
  */
 
 import express from 'express'
-import exitHook from 'async-exit-hook'
 import { closeDb, connectDb, getDb } from '~/config/mongodb'
+import { env } from './config/environment'
 
 const startServer = () => {
   const app = express()
-
-  const hostname = 'localhost'
-  const port = 8017
 
   app.get('/', async (req, res) => {
     console.log(await getDb().listCollections().toArray())
     res.end('<h1>Hello World!</h1><hr>')
   })
 
-  app.listen(port, hostname, () => {
+  app.listen(env.APP_PORT, env.APP_HOST, () => {
     // eslint-disable-next-line no-console
-    console.log(`Hello Trung Quan Dev, I am running at ${ hostname }:${ port }/`)
-  })
-
-  exitHook(() => {
-    closeDb()
-    console.log('Exiting')
+    console.log(`Hello Trung Quan Dev, I am running at ${ env.APP_HOST }:${ env.APP_PORT }/`)
   })
 }
 
@@ -39,4 +31,5 @@ connectDb()
   })
   .catch(err => {
     console.error(err)
+    process.exit(0)
   })
