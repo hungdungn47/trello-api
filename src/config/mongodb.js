@@ -1,8 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb')
 import { env } from '~/config/environment'
 
-let trelloDatabaseInstance = null
-
 const client = new MongoClient(env.MONGODB_URI, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -10,6 +8,7 @@ const client = new MongoClient(env.MONGODB_URI, {
     deprecationErrors: true
   }
 })
+let trelloDatabaseInstance
 
 export const connectDb = async () => {
   await client.connect()
@@ -20,8 +19,4 @@ export const connectDb = async () => {
 export const getDb = () => {
   if (!trelloDatabaseInstance) throw new Error('Database is not connected yet!')
   return trelloDatabaseInstance
-}
-
-export const closeDb = async () => {
-  await client.close()
 }
