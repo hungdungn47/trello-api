@@ -50,7 +50,7 @@ const pushCardOrderIds = async (card) => {
       { _id: card.columnId },
       { $addToSet: { cardOrderIds: card._id } }
     )
-    return result.value || null
+    return result
   } catch (error) {
     throw new Error(error)
   }
