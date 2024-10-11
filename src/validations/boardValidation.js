@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '~/utils/ApiError'
 import { BOARD_TYPES } from '~/utils/constants'
+import { OBJECT_ID_RULE, OBJECT_ID_RULE_MESSAGE } from '~/utils/validators'
 
 const createNew = async (req, res, next) => {
   const correctCondition = Joi.object({
@@ -37,7 +38,27 @@ const update = async (req, res, next) => {
     next()
 
   } catch (error) {
-    //eslint-disable-next-line no-console
+    const customeError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
+    next(customeError)
+  }
+}
+
+const moveCardToDifferentColumn = async (req, res, next) => {
+  const correctCondition = Joi.object({
+    currentCardId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    oldColumnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    oldCardOrderIds: Joi.array().required().items(
+      Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+    ),
+    newColumnId: Joi.string().required().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE),
+    newCardOrderIds: Joi.array().required().items(
+      Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+    )
+  })
+  try {
+    await correctCondition.validateAsync(req.body, { abortEarly: false })
+    next()
+  } catch (error) {
     const customeError = new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message)
     next(customeError)
   }
@@ -45,5 +66,6 @@ const update = async (req, res, next) => {
 
 export const boardValidation = {
   createNew,
-  update
+  update,
+  moveCardToDifferentColumn
 }
