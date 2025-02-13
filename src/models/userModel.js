@@ -1,5 +1,6 @@
 const Joi = require("joi")
 const { getDb } = require("~/config/mongodb")
+import { ObjectId } from "mongodb"
 import { EMAIL_RULE, EMAIL_RULE_MESSAGE, PASSWORD_RULE, PASSWORD_RULE_MESSAGE } from "~/utils/validators"
 
 const USER_ROLES = {
