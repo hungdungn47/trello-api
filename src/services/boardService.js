@@ -28,6 +28,15 @@ const createNew = async (reqBody) => {
   }
 }
 
+const getAllBoards = async () => {
+  try {
+    const listBoards = await boardModel.getAllBoards()
+    return listBoards
+  } catch (error) {
+    throw error
+  }
+}
+
 const getDetails = async (boardId) => {
   try {
     const board = await boardModel.getDetails(boardId)
@@ -84,5 +93,6 @@ export const boardService = {
   createNew,
   getDetails,
   update,
-  moveCardToDifferentColumn
+  moveCardToDifferentColumn,
+  getAllBoards
 }

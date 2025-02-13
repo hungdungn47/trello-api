@@ -36,6 +36,15 @@ const createNew = async (data) => {
   }
 }
 
+const getAllBoards = async () => {
+  try {
+    const data = await getDb().collection(BOARD_COLLECTION_NAME).find({}).toArray()
+    return data
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 const findOneById = async (id) => {
   try {
     const result = await getDb().collection(BOARD_COLLECTION_NAME).aggregate([
@@ -144,5 +153,6 @@ export const boardModel = {
   getDetails,
   pushColumnOrderIds,
   pullColumnOrderIds,
-  update
+  update,
+  getAllBoards
 }
