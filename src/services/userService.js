@@ -5,6 +5,8 @@ import bcrypt from 'bcryptjs'
 import { pickUser } from '~/utils/formatters'
 import nodemailer from 'nodemailer'
 import { v4 as uuidv4 } from 'uuid'
+import { env } from '~/config/environment'
+import { jwtProvider } from '~/providers/jwtProvider'
 
 const createNew = async (reqBody) => {
   // Check if user is already in database
@@ -28,7 +30,7 @@ const createNew = async (reqBody) => {
   const getCreatedUser = await userModel.findOneByEmail(reqBody.email)
 
   const transporter = nodemailer.createTransport({
-    host: 'smpt.gmail.com',
+    host: 'smtmp.gmail.com',
     port: 587,
     service: 'gmail',
     auth: {
@@ -64,6 +66,47 @@ const createNew = async (reqBody) => {
   return pickUser(getCreatedUser)
 }
 
+const verifyAccount = async (reqBody) => {
+  const user = await userModel.findOneByEmail(reqBody.email)
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+  if (user.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is already verified!')
+  if (reqBody.token !== user.verifyToken) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your token is invalid!')
+
+  const updateData = {
+    isActive: true,
+    verifyToken: null
+  }
+  const updatedUser = await userModel.update(user._id, updateData)
+  return pickUser(updatedUser)
+}
+
+const login = async (reqBody) => {
+  const user = await userModel.findOneByEmail(reqBody.email)
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+  if (!user.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not verified yet!')
+
+  if (!bcrypt.compareSync(reqBody.password, user.password)) {
+    throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your email or password is incorrect!')
+  }
+
+  // JWT payload
+  const userInfo = { _id: user._id, email: user.email }
+
+  const accessToken = await jwtProvider.generateToken(
+    userInfo,
+    env.ACCESS_TOKEN_SECRET_KEY,
+    env.ACCESS_TOKEN_LIFE_TIME
+  )
+
+  const refreshToken = await jwtProvider.generateToken(
+    userInfo,
+    env.REFRESH_TOKEN_SECRET_KEY,
+    env.REFRESH_TOKEN_LIFE_TIME
+  )
+
+  return { accessToken, refreshToken, ...pickUser(user) }
+}
+
 export const userService = {
-  createNew
+  createNew, verifyAccount, login
 }
