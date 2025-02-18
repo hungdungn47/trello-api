@@ -4,16 +4,19 @@
  * "A bit of fragrance clings to the hand that gives flowers!"
  */
 
-import express from "express";
-import { connectDb } from "~/config/mongodb";
-import { env } from "~/config/environment";
-import { APIs_V1 } from "~/routes/v1";
-import { errorHandlingMiddleware } from "~/middlewares/errorHandlingMiddleware";
-import cors from "cors";
-import { corsOptions } from "./config/cors";
+import express from "express"
+import { connectDb } from "~/config/mongodb"
+import { env } from "~/config/environment"
+import { APIs_V1 } from "~/routes/v1"
+import { errorHandlingMiddleware } from "~/middlewares/errorHandlingMiddleware"
+import cors from "cors"
+import { corsOptions } from "./config/cors"
+import cookieParser from "cookie-parser"
 
 const startServer = () => {
   const app = express();
+
+  app.use(cookieParser())
 
   app.use(cors(corsOptions));
   // Enable req.body json data
