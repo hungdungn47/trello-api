@@ -5,9 +5,12 @@ const { StatusCodes } = require("http-status-codes")
 const { default: ApiError } = require("~/utils/ApiError")
 
 const isAuthorized = async (req, res, next) => {
-  const accessToken = req.headers?.accessToken
+  const accessToken = req.cookies?.accessToken
+
+  console.log(accessToken)
   if (!accessToken) {
     next(new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized! Missing token!'))
+    return
   }
 
   try {
