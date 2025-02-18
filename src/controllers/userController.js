@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import ms from 'ms'
 import { userService } from '~/services/userService'
+import ApiError from '~/utils/ApiError'
 
 const createNew = async (req, res, next) => {
   try {
@@ -44,6 +45,36 @@ const login = async (req, res, next) => {
   }
 }
 
+const logout = async (req, res, next) => {
+  try {
+    res.clearCookie('accessToken')
+    res.clearCookie('refreshToken')
+
+    res.status(StatusCodes.OK).json({ loggedOut: true })
+  } catch (error) {
+    next(error)
+  }
+}
+
+const refreshToken = async (req, res, next) => {
+  try {
+    const token = req.cookies?.refreshToken
+    if (!token) {
+      next(new ApiError(StatusCodes.UNAUTHORIZED, 'Missing token!'))
+    }
+    const result = await userService.refreshToken(token)
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      maxAge: ms('14 days')
+    })
+    res.status(StatusCodes.OK).json(result)
+  } catch (error) {
+    next(new ApiError(StatusCodes.UNAUTHORIZED, 'Token expired! Please login!'))
+  }
+}
+
 export const userController = {
-  createNew, verifyAccount, login
+  createNew, verifyAccount, login, logout, refreshToken
 }

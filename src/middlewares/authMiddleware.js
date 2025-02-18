@@ -7,14 +7,13 @@ const { default: ApiError } = require("~/utils/ApiError")
 const isAuthorized = async (req, res, next) => {
   const accessToken = req.cookies?.accessToken
 
-  console.log(accessToken)
   if (!accessToken) {
     next(new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized! Missing token!'))
     return
   }
 
   try {
-    const decodedToken = jwtProvider.verifyToken(accessToken, env.ACCESS_TOKEN_SECRET_KEY)
+    const decodedToken = await jwtProvider.verifyToken(accessToken, env.ACCESS_TOKEN_SECRET_KEY)
 
     req.decodedToken = decodedToken
 
