@@ -107,6 +107,23 @@ const login = async (reqBody) => {
   return { accessToken, refreshToken, ...pickUser(user) }
 }
 
+const refreshToken = async (token) => {
+  const decodedRefreshToken = await jwtProvider.verifyToken(token, env.REFRESH_TOKEN_SECRET_KEY)
+
+  const userInfo = {
+    _id: decodedRefreshToken._id,
+    email: decodedRefreshToken.email
+  }
+
+  const newAccessToken = await jwtProvider.generateToken(
+    userInfo,
+    env.ACCESS_TOKEN_SECRET_KEY,
+    env.ACCESS_TOKEN_LIFE_TIME
+  )
+
+  return { accessToken: newAccessToken }
+}
+
 export const userService = {
-  createNew, verifyAccount, login
+  createNew, verifyAccount, login, refreshToken
 }
