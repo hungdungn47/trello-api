@@ -38,7 +38,7 @@ const createNew = async (data) => {
 }
 
 const findOneById = async (userId) => {
-  const user = await getDb().collection(USER_COLLECTION_NAME).findOne({ _id: userId })
+  const user = await getDb().collection(USER_COLLECTION_NAME).findOne({ _id: new ObjectId(userId) })
   return user
 }
 
@@ -54,7 +54,7 @@ const update = async (userId, updateData) => {
     }
   })
   const updatedUser = await getDb().collection(USER_COLLECTION_NAME).findOneAndUpdate(
-    { _id: userId },
+    { _id: new ObjectId(userId) },
     { $set: updateData },
     { returnDocument: 'after' }
   )

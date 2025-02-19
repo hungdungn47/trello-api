@@ -124,6 +124,28 @@ const refreshToken = async (token) => {
   return { accessToken: newAccessToken }
 }
 
+const update = async (userId, reqBody) => {
+  const user = await userModel.findOneById(userId)
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
+  if (!user.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not verified yet!')
+
+  let updatedUser = {}
+
+  if (reqBody.currentPassword && reqBody.newPassword) {
+    if (!bcrypt.compareSync(reqBody.currentPassword, user.password)) {
+      throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your current password is incorrect!')
+    }
+
+    updatedUser = await userModel.update(userId, {
+      password: bcrypt.hashSync(reqBody.newPassword, 8)
+    })
+  } else {
+    updatedUser = await userModel.update(userId, reqBody)
+  }
+
+  return pickUser(updatedUser)
+}
+
 export const userService = {
-  createNew, verifyAccount, login, refreshToken
+  createNew, verifyAccount, login, refreshToken, update
 }
