@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer'
 import { v4 as uuidv4 } from 'uuid'
 import { env } from '~/config/environment'
 import { jwtProvider } from '~/providers/jwtProvider'
+import { cloudinaryProvider } from '~/providers/cloudinaryProvider'
 
 const createNew = async (reqBody) => {
   // Check if user is already in database
@@ -124,7 +125,7 @@ const refreshToken = async (token) => {
   return { accessToken: newAccessToken }
 }
 
-const update = async (userId, reqBody) => {
+const update = async (userId, reqBody, userAvatar) => {
   const user = await userModel.findOneById(userId)
   if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!')
   if (!user.isActive) throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Your account is not verified yet!')
@@ -138,6 +139,13 @@ const update = async (userId, reqBody) => {
 
     updatedUser = await userModel.update(userId, {
       password: bcrypt.hashSync(reqBody.newPassword, 8)
+    })
+  } else if (userAvatar) {
+    const uploadResult = await cloudinaryProvider.streamUpload(userAvatar.buffer, 'users')
+    console.log('Upload result:', uploadResult)
+
+    updatedUser = await userModel.update(userId, {
+      avatar: uploadResult.secure_url
     })
   } else {
     updatedUser = await userModel.update(userId, reqBody)
