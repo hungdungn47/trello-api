@@ -17,12 +17,18 @@ const createNew = async (req, res, next) => {
 
 const getAllBoards = async (req, res, next) => {
   try {
-    const listBoards = await boardService.getAllBoards()
+    const userId = req.decodedToken._id
+    const { page, itemsPerPage } = req.query
+
+    console.log('page: ', page)
+    console.log('itemsPerPage:', itemsPerPage)
+
+    const listBoards = await boardService.getAllBoards(userId, page, itemsPerPage)
     res.status(StatusCodes.OK).json(listBoards)
   } catch (error) {
     next(error)
   }
-} 
+}
 
 const getDetails = async (req, res, next) => {
   try {

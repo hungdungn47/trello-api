@@ -5,6 +5,7 @@ import { ObjectId } from 'mongodb'
 import { BOARD_TYPES } from '~/utils/constants'
 import { columnModel } from './columnModel'
 import { cardModel } from './cardModel'
+import { skippedPages } from '~/utils/algorithms'
 
 const BOARD_COLLECTION_NAME = 'boards'
 const BOARD_COLLECTION_SCHEMA = Joi.object({
@@ -13,6 +14,12 @@ const BOARD_COLLECTION_SCHEMA = Joi.object({
   description: Joi.string().required().min(3).max(256).trim().strict(),
   type: Joi.string().valid(BOARD_TYPES.PUBLIC, BOARD_TYPES.PRIVATE).required(),
   columnOrderIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
+  ownerIds: Joi.array().items(
+    Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
+  ).default([]),
+  memberIds: Joi.array().items(
     Joi.string().pattern(OBJECT_ID_RULE).message(OBJECT_ID_RULE_MESSAGE)
   ).default([]),
   createdAt: Joi.date().timestamp('javascript').default(Date.now),
@@ -36,10 +43,42 @@ const createNew = async (data) => {
   }
 }
 
-const getAllBoards = async () => {
+const getAllBoards = async (userId, page, itemsPerPage) => {
   try {
-    const data = await getDb().collection(BOARD_COLLECTION_NAME).find({}).toArray()
-    return data
+    const queryCondition = [
+      { _destroy: false },
+      {
+        $or: [
+          { ownerIds: { $all: [new ObjectId(userId)] } },
+          { memberIds: { $all: [new ObjectId(userId)] } }
+        ]
+      }
+    ]
+    const query = await getDb().collection(BOARD_COLLECTION_NAME).aggregate(
+      [
+        { $match: { $and: queryCondition } },
+        { $sort: { title: 1 } },
+        {
+          $facet: {
+            'queryBoards': [
+              { $skip: skippedPages(page, itemsPerPage) },
+              { $limit: itemsPerPage }
+            ],
+            'queryTotalBoards': [{ $count: 'numOfBoards' }]
+          }
+        }
+      ],
+      {
+        collation: { locale: 'en' }
+      }
+    ).toArray()
+
+    console.log('query:', query)
+    const res = query[0]
+    return {
+      boards: res.queryBoards || [],
+      totalBoards: res.queryTotalBoards[0]?.numOfBoards || 0
+    }
   } catch (error) {
     throw new Error(error)
   }
@@ -48,22 +87,28 @@ const getAllBoards = async () => {
 const findOneById = async (id) => {
   try {
     const result = await getDb().collection(BOARD_COLLECTION_NAME).aggregate([
-      { $match: {
-        _id: new ObjectId(id),
-        _destroy: false
-      } },
-      { $lookup: {
-        from: columnModel.COLUMN_COLLECTION_NAME,
-        localField: '_id',
-        foreignField: 'boardId',
-        as: 'columns'
-      } },
-      { $lookup: {
-        from: cardModel.CARD_COLLECTION_NAME,
-        localField: '_id',
-        foreignField: 'boardId',
-        as: 'cards'
-      } }
+      {
+        $match: {
+          _id: new ObjectId(id),
+          _destroy: false
+        }
+      },
+      {
+        $lookup: {
+          from: columnModel.COLUMN_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'boardId',
+          as: 'columns'
+        }
+      },
+      {
+        $lookup: {
+          from: cardModel.CARD_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'boardId',
+          as: 'cards'
+        }
+      }
     ]).toArray()
     return result[0] || {}
   } catch (error) {
@@ -74,22 +119,28 @@ const findOneById = async (id) => {
 const getDetails = async (id) => {
   try {
     const result = await getDb().collection(BOARD_COLLECTION_NAME).aggregate([
-      { $match: {
-        _id: new ObjectId(id),
-        _destroy: false
-      } },
-      { $lookup: {
-        from: columnModel.COLUMN_COLLECTION_NAME,
-        localField: '_id',
-        foreignField: 'boardId',
-        as: 'columns'
-      } },
-      { $lookup: {
-        from: cardModel.CARD_COLLECTION_NAME,
-        localField: '_id',
-        foreignField: 'boardId',
-        as: 'cards'
-      } }
+      {
+        $match: {
+          _id: new ObjectId(id),
+          _destroy: false
+        }
+      },
+      {
+        $lookup: {
+          from: columnModel.COLUMN_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'boardId',
+          as: 'columns'
+        }
+      },
+      {
+        $lookup: {
+          from: cardModel.CARD_COLLECTION_NAME,
+          localField: '_id',
+          foreignField: 'boardId',
+          as: 'cards'
+        }
+      }
     ]).toArray()
     return result[0] || null
   } catch (error) {

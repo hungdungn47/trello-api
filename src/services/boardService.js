@@ -10,7 +10,8 @@ import ApiError from '~/utils/ApiError'
 import { slugify } from '~/utils/formatters'
 import { columnModel } from '~/models/columnModel'
 import { cardModel } from '~/models/cardModel'
-import { cloneDeep } from 'lodash'
+import { cloneDeep, parseInt } from 'lodash'
+import { DEFAULT_ITEMS_PER_PAGE, DEFAULT_PAGE } from '~/utils/constants'
 const createNew = async (reqBody) => {
   try {
     const newBoard = {
@@ -28,9 +29,9 @@ const createNew = async (reqBody) => {
   }
 }
 
-const getAllBoards = async () => {
+const getAllBoards = async (userId, page = DEFAULT_PAGE, itemsPerPage = DEFAULT_ITEMS_PER_PAGE) => {
   try {
-    const listBoards = await boardModel.getAllBoards()
+    const listBoards = await boardModel.getAllBoards(userId, parseInt(page, 10), parseInt(itemsPerPage, 10))
     return listBoards
   } catch (error) {
     throw error
