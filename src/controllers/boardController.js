@@ -8,7 +8,8 @@ import { boardService } from '~/services/boardService'
 
 const createNew = async (req, res, next) => {
   try {
-    const createdBoard = await boardService.createNew(req.body)
+    const userId = req.decodedToken._id
+    const createdBoard = await boardService.createNew(userId, req.body)
     res.status(StatusCodes.CREATED).json(createdBoard)
   } catch (error) {
     next(error)
@@ -20,9 +21,6 @@ const getAllBoards = async (req, res, next) => {
     const userId = req.decodedToken._id
     const { page, itemsPerPage } = req.query
 
-    console.log('page: ', page)
-    console.log('itemsPerPage:', itemsPerPage)
-
     const listBoards = await boardService.getAllBoards(userId, page, itemsPerPage)
     res.status(StatusCodes.OK).json(listBoards)
   } catch (error) {
@@ -32,7 +30,9 @@ const getAllBoards = async (req, res, next) => {
 
 const getDetails = async (req, res, next) => {
   try {
-    const board = await boardService.getDetails(req.params.id)
+    const userId = req.decodedToken._id
+    const boardId = req.params.id
+    const board = await boardService.getDetails(userId, boardId)
     res.status(StatusCodes.OK).json(board)
   } catch (error) {
     next(error)
