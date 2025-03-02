@@ -1,3 +1,5 @@
+import { ACCEPTED } from "http-status-codes"
+
 /**
  * Updated by trungquandev.com's author on August 17 2023
  * YouTube: https://youtube.com/@trungquandev
@@ -15,3 +17,13 @@ export const BOARD_TYPES = {
 
 export const DEFAULT_PAGE = 1
 export const DEFAULT_ITEMS_PER_PAGE = 12
+
+export const INVITATION_TYPES = {
+  BOARD_INVITATION: 'BOARD_INVITATION'
+}
+
+export const BOARD_INVITATION_STATUS = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED'
+}
