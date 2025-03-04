@@ -1,3 +1,7 @@
+import { pipeline } from "nodemailer/lib/xoauth2"
+import { userModel } from "./userModel"
+import { boardModel } from "./boardModel"
+
 const Joi = require("joi")
 const { ObjectId } = require("mongodb")
 const { getDb } = require("~/config/mongodb")
@@ -74,10 +78,50 @@ const update = async (invitationId, updateData) => {
   return result
 }
 
+const findByUser = async (userId) => {
+  const queryConditions = [
+    { inviteeId: new ObjectId(userId) },
+    { _destroy: false }
+  ]
+
+  const results = await getDb().collection(INVITATION_COLLECTION_NAME).aggregate([
+    { $match: { $and: queryConditions } },
+    {
+      $lookup: {
+        from: userModel.USER_COLLECTION_NAME,
+        localField: 'invitorId',
+        foreignField: '_id',
+        as: 'invitor',
+        pipeline: [{ $project: { 'password': 0, 'verifyToken': 0 } }]
+      }
+    },
+    {
+      $lookup: {
+        from: userModel.USER_COLLECTION_NAME,
+        localField: 'inviteeId',
+        foreignField: '_id',
+        as: 'invitee',
+        pipeline: [{ $project: { 'password': 0, 'verifyToken': 0 } }]
+      }
+    },
+    {
+      $lookup: {
+        from: boardModel.BOARD_COLLECTION_NAME,
+        localField: 'boardInvitation.boardId',
+        foreignField: '_id',
+        as: 'board'
+      }
+    },
+  ]).toArray()
+
+  return results
+}
+
 export const invitationModel = {
   INVITATION_COLLECTION_NAME,
   INVITATION_COLLECTION_SCHEMA,
   createNewBoardInvitation,
   findOneById,
+  findByUser,
   update
 }
