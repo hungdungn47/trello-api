@@ -45,14 +45,12 @@ const createNewBoardInvitation = async (data) => {
     }
   }
 
-  console.log('invitation data in model: ', newInvitation)
-
   const createdInvitation = await getDb().collection(INVITATION_COLLECTION_NAME).insertOne(newInvitation)
   return createdInvitation
 }
 
 const findOneById = async (invitationId) => {
-  const result = await getDb().collection(INVITATION_COLLECTION_NAME).findOne({ _id: invitationId })
+  const result = await getDb().collection(INVITATION_COLLECTION_NAME).findOne({ _id: new ObjectId(invitationId) })
   return result
 }
 
@@ -71,7 +69,7 @@ const update = async (invitationId, updateData) => {
   }
 
   const result = await getDb().collection(INVITATION_COLLECTION_NAME).findOneAndUpdate(
-    { _id: invitationId },
+    { _id: new ObjectId(invitationId) },
     { $set: updateData },
     { returnDocument: 'after' }
   )

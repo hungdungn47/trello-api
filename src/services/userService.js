@@ -142,7 +142,6 @@ const update = async (userId, reqBody, userAvatar) => {
     })
   } else if (userAvatar) {
     const uploadResult = await cloudinaryProvider.streamUpload(userAvatar.buffer, 'users')
-    console.log('Upload result:', uploadResult)
 
     updatedUser = await userModel.update(userId, {
       avatar: uploadResult.secure_url

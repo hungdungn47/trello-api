@@ -30,7 +30,6 @@ const update = async (userInfo, cardId, reqBody, cardCoverFile) => {
 
   if (cardCoverFile) {
     const uploadResult = await cloudinaryProvider.streamUpload(cardCoverFile.buffer, 'cardCovers')
-    console.log('Upload result:', uploadResult)
 
     updatedCard = await cardModel.update(cardId, {
       cover: uploadResult.secure_url

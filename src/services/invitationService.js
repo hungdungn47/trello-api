@@ -28,8 +28,6 @@ const createNewBoardInvitation = async (reqBody, invitorId) => {
     }
   }
 
-  console.log('invitation data in service: ', newInvitationData)
-
   const createdInvitation = await invitationModel.createNewBoardInvitation(newInvitationData)
   const getInvitation = await invitationModel.findOneById(createdInvitation.insertedId.toString())
 
@@ -45,7 +43,6 @@ const createNewBoardInvitation = async (reqBody, invitorId) => {
 
 const getInvitations = async (userId) => {
   const invitationsList = await invitationModel.findByUser(userId)
-  console.log('invitations:', invitationsList)
 
   const result = invitationsList.map(i => {
     return {
@@ -58,7 +55,36 @@ const getInvitations = async (userId) => {
   return result
 }
 
+const updateBoardInvitation = async (userId, invitationId, status) => {
+  const getInvitation = await invitationModel.findOneById(invitationId);
+  if (!getInvitation) throw new ApiError(StatusCodes.NOT_FOUND, 'Invitation not found!')
+
+  const getBoard = await boardModel.findOneById(getInvitation.boardInvitation.boardId)
+  if (!getBoard) throw new ApiError(StatusCodes.NOT_FOUND, 'Board not found!')
+
+  const boardOwnerAndMemberIds = [...getBoard.ownerIds, ...getBoard.memberIds].toString()
+  if (status === BOARD_INVITATION_STATUS.ACCEPTED && boardOwnerAndMemberIds.includes(userId)) {
+    throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'You are already a member of this board!')
+  }
+
+  const updateData = {
+    boardInvitation: {
+      ...getInvitation.boardInvitation,
+      status: status
+    }
+  }
+
+  const updatedInvitation = await invitationModel.update(invitationId, updateData)
+
+  if (updatedInvitation.boardInvitation.status === BOARD_INVITATION_STATUS.ACCEPTED) {
+    await boardModel.pushMemberIds(updatedInvitation.boardInvitation.boardId, userId)
+  }
+
+  return updatedInvitation
+}
+
 export const invitationService = {
   createNewBoardInvitation,
-  getInvitations
+  getInvitations,
+  updateBoardInvitation
 }
