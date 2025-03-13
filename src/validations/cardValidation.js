@@ -25,7 +25,8 @@ const update = async (req, res, next) => {
     title: Joi.string().required().min(3).max(50).trim().strict().optional(),
     cover: Joi.string().optional(),
     description: Joi.string().optional(),
-    newComment: Joi.object().optional()
+    newComment: Joi.object().optional(),
+    incomingMemberInfo: Joi.object().optional(),
   })
 
   try {
