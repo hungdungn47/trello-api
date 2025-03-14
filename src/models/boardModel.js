@@ -225,6 +225,18 @@ const update = async (boardId, updateData) => {
   }
 }
 
+const pushMemberIds = async (boardId, userId) => {
+  try {
+    const result = await getDb().collection(BOARD_COLLECTION_NAME).updateOne(
+      { _id: boardId },
+      { $addToSet: { memberIds: new ObjectId(userId) } }
+    )
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
 export const boardModel = {
   BOARD_COLLECTION_NAME,
   BOARD_COLLECTION_SCHEMA,
@@ -234,5 +246,6 @@ export const boardModel = {
   pushColumnOrderIds,
   pullColumnOrderIds,
   update,
-  getAllBoards
+  getAllBoards,
+  pushMemberIds
 }
