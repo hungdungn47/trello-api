@@ -19,9 +19,10 @@ const createNew = async (req, res, next) => {
 const getAllBoards = async (req, res, next) => {
   try {
     const userId = req.decodedToken._id
-    const { page, itemsPerPage } = req.query
-
-    const listBoards = await boardService.getAllBoards(userId, page, itemsPerPage)
+    const { page, itemsPerPage, q } = req.query
+    const queryFilters = q
+    console.log(queryFilters)
+    const listBoards = await boardService.getAllBoards(userId, page, itemsPerPage, queryFilters)
     res.status(StatusCodes.OK).json(listBoards)
   } catch (error) {
     next(error)
