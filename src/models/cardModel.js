@@ -103,6 +103,30 @@ const deleteManyByColumnId = async (columnId) => {
   }
 }
 
+const updateMembers = async (cardId, incomingMemberInfo) => {
+  let updateCondition = {}
+  if (incomingMemberInfo.action === 'ADD') {
+    updateCondition = {
+      $push: {
+        memberIds: new ObjectId(incomingMemberInfo.userId)
+      }
+    }
+  } else if (incomingMemberInfo.action === 'REMOVE') {
+    updateCondition = {
+      $pull: {
+        memberIds: new ObjectId(incomingMemberInfo.userId)
+      }
+    }
+  }
+
+  const result = await getDb().collection(CARD_COLLECTION_NAME).findOneAndUpdate(
+    { _id: new ObjectId(cardId) },
+    updateCondition,
+    { returnDocument: 'after' }
+  )
+  return result
+}
+
 export const cardModel = {
   CARD_COLLECTION_NAME,
   CARD_COLLECTION_SCHEMA,
@@ -110,5 +134,6 @@ export const cardModel = {
   findOneById,
   update,
   deleteManyByColumnId,
-  unshiftNewComment
+  unshiftNewComment,
+  updateMembers
 }

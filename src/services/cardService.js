@@ -42,6 +42,8 @@ const update = async (userInfo, cardId, reqBody, cardCoverFile) => {
       commentedAt: Date.now()
     }
     updatedCard = await cardModel.unshiftNewComment(cardId, commentData)
+  } else if (reqBody.incomingMemberInfo) {
+    updatedCard = await cardModel.updateMembers(cardId, reqBody.incomingMemberInfo)
   } else {
     updatedCard = await cardModel.update(cardId, updateData)
   }
