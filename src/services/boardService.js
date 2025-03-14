@@ -29,9 +29,14 @@ const createNew = async (userId, reqBody) => {
   }
 }
 
-const getAllBoards = async (userId, page = DEFAULT_PAGE, itemsPerPage = DEFAULT_ITEMS_PER_PAGE) => {
+const getAllBoards = async (userId, page = DEFAULT_PAGE, itemsPerPage = DEFAULT_ITEMS_PER_PAGE, queryFilters) => {
   try {
-    const listBoards = await boardModel.getAllBoards(userId, parseInt(page, 10), parseInt(itemsPerPage, 10))
+    const listBoards = await boardModel.getAllBoards(
+      userId,
+      parseInt(page, 10),
+      parseInt(itemsPerPage, 10),
+      queryFilters
+    )
     return listBoards
   } catch (error) {
     throw error

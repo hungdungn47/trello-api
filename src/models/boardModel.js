@@ -49,7 +49,7 @@ const createNew = async (userId, data) => {
   }
 }
 
-const getAllBoards = async (userId, page, itemsPerPage) => {
+const getAllBoards = async (userId, page, itemsPerPage, queryFilters) => {
   try {
     const queryCondition = [
       { _destroy: false },
@@ -60,6 +60,16 @@ const getAllBoards = async (userId, page, itemsPerPage) => {
         ]
       }
     ]
+
+    if (queryFilters) {
+      Object.keys(queryFilters).forEach((key) => {
+        // queryCondition.push({ [key]: { $regex: queryFilters[key] } })
+        queryCondition.push({ [key]: { $regex: new RegExp(queryFilters[key], 'i') } })
+      })
+    }
+
+    console.log(queryCondition)
+
     const query = await getDb().collection(BOARD_COLLECTION_NAME).aggregate(
       [
         { $match: { $and: queryCondition } },
