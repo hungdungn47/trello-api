@@ -51,7 +51,7 @@ const startServer = () => {
       console.log(`Production running at port:${process.env.PORT}/`);
     });
   } else {
-    server.listen(env.LOCAL_DEV_APP_PORT, env.LOCAL_DEV_APP_HOST, () => {
+    server.listen(env.LOCAL_DEV_APP_PORT, '0.0.0.0', () => {
       // eslint-disable-next-line no-console
       console.log(
         `Server is running at ${env.LOCAL_DEV_APP_HOST}:${env.LOCAL_DEV_APP_PORT}/`
