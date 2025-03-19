@@ -44,7 +44,7 @@ APIs are available at: https://trello-api-aqqf.onrender.com
 
 🔹 **Runtime**: Node.js  
 🔹 **Frontend**: React.js, Redux, dnd-kit, socket.io, Material-UI    
-🔹 **Backend**: ExpressJS, socket.io, multer, cloudinary
+🔹 **Backend**: ExpressJS, socket.io, multer, cloudinary    
 🔹 **Database**: MongoDB    
 
 
