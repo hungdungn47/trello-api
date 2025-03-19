@@ -1,4 +1,4 @@
-# 📝 Trello Web Clone - Frontend  
+# 📝 Trello Web Clone - Backend  
 
 Trello is an intuitive and powerful tool for organizing ideas, tasks, and workflows.  
 It allows teams to manage projects with a **drag-and-drop interface**, featuring lists and cards that store **comments, attachments, and collaboration tools**.  
